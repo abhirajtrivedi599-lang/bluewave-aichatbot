@@ -2038,12 +2038,7 @@ userInput.focus();
 //  BLUEWAVE AI — script.js (Complete)
 // =====================================================
 
-const AVATARS = {
-  Male:[{emoji:'👨‍⚕️',name:'Doctor'},{emoji:'👦',name:'Boy'},{emoji:'👨',name:'Man'},{emoji:'👴',name:'Elder'},{emoji:'🧑‍💼',name:'Professional'},{emoji:'👨‍🔬',name:'Scientist'},{emoji:'🧔',name:'Bearded'},{emoji:'👨‍🚀',name:'Explorer'}],
-  Female:[{emoji:'👩‍⚕️',name:'Doctor'},{emoji:'👧',name:'Girl'},{emoji:'👩',name:'Woman'},{emoji:'👵',name:'Elder'},{emoji:'👩‍💼',name:'Professional'},{emoji:'👩‍🔬',name:'Scientist'},{emoji:'🧕',name:'Hijabi'},{emoji:'👩‍🚀',name:'Explorer'}],
-  'Non-binary':[{emoji:'🧑',name:'Neutral'},{emoji:'🧑‍⚕️',name:'Medic'},{emoji:'🧑‍💼',name:'Professional'},{emoji:'🧑‍🔬',name:'Scientist'},{emoji:'🧑‍🎤',name:'Creative'},{emoji:'🧑‍🚀',name:'Explorer'}],
-  'Prefer not to say':[{emoji:'😊',name:'Friendly'},{emoji:'🌊',name:'Ocean'},{emoji:'🦋',name:'Butterfly'},{emoji:'⭐',name:'Star'},{emoji:'🌱',name:'Growth'},{emoji:'💙',name:'Blue Heart'}],
-};
+
 
 let userProfile={}, selectedAvatar=null;
 let currentUserId=null;
