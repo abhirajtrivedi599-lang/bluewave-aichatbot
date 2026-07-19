@@ -35,6 +35,8 @@ CREATE TABLE IF NOT EXISTS messages (
 // Save User Information
 app.post("/users", (req, res) => {
 
+    console.log("Received User Data:", req.body);
+
     const { name, age, gender, weight } = req.body;
 
     db.run(
@@ -92,4 +94,13 @@ const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, "0.0.0.0", () => {
     console.log(`Server running on port ${PORT}`);
+});
+app.get("/users", (req, res) => {
+    db.all("SELECT * FROM users", [], (err, rows) => {
+        if (err) {
+            return res.status(500).json(err);
+        }
+
+        res.json(rows);
+    });
 });
