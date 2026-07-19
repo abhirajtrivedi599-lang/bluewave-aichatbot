@@ -1,0 +1,792 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>BLUEWAVE AI | Professional Medical Assistant</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Nunito:wght@300;400;500;600;700&family=Amatic+SC:wght@700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="style.css" />
+    <style>
+    /* ═══ BLUEWAVE INLINE SVG LOGO ANIMATIONS ═══ */
+    .bw-inline-logo {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        height: 100%;
+    }
+    .bw-svg-anim {
+        width: 100%;
+        height: 100%;
+        display: block;
+        overflow: visible;
+    }
+
+    /* Wave layers: staggered undulating float */
+    @keyframes bwWaveFloat {
+        0%   { transform: translateY(0px) scaleX(1); }
+        25%  { transform: translateY(-3px) scaleX(1.01); }
+        50%  { transform: translateY(-5px) scaleX(1); }
+        75%  { transform: translateY(-2px) scaleX(0.99); }
+        100% { transform: translateY(0px) scaleX(1); }
+    }
+    @keyframes bwWaveFloat2 {
+        0%   { transform: translateY(0px) scaleX(1); }
+        33%  { transform: translateY(-4px) scaleX(1.015); }
+        66%  { transform: translateY(-6px) scaleX(0.99); }
+        100% { transform: translateY(0px) scaleX(1); }
+    }
+    @keyframes bwWaveFloat3 {
+        0%   { transform: translateY(0px); }
+        50%  { transform: translateY(-4px); }
+        100% { transform: translateY(0px); }
+    }
+
+    /* Flame/top shape: gentle pulse glow */
+    @keyframes bwFlamePulse {
+        0%,100% { opacity: 1; transform: scaleY(1); }
+        50%      { opacity: 0.85; transform: scaleY(1.04); }
+    }
+
+    /* Color shimmer on waves */
+    @keyframes bwColorShimmer {
+        0%,100% { fill: #0d6a8a; }
+        50%      { fill: #00c8e0; }
+    }
+    @keyframes bwColorShimmer2 {
+        0%,100% { fill: #0d6a8a; }
+        50%      { fill: #1ab8d4; }
+    }
+    @keyframes bwColorShimmer3 {
+        0%,100% { fill: #0d6a8a; }
+        50%      { fill: #059db5; }
+    }
+
+    /* Intro splash logo: scale-in + spin entrance */
+    @keyframes bwIntroEntrance {
+        0%   { opacity: 0; transform: scale(0.3) rotate(-30deg); }
+        60%  { opacity: 1; transform: scale(1.1) rotate(5deg); }
+        80%  { transform: scale(0.95) rotate(-2deg); }
+        100% { opacity: 1; transform: scale(1) rotate(0deg); }
+    }
+
+    /* Topbar logo: continuous gentle bob */
+    @keyframes bwTopbarBob {
+        0%,100% { transform: translateY(0); }
+        50%      { transform: translateY(-2px); }
+    }
+
+    /* Sidebar logo: slow rotate-shimmer */
+    @keyframes bwSidebarPulse {
+        0%,100% { filter: drop-shadow(0 0 0px transparent); }
+        50%      { filter: drop-shadow(0 0 6px rgba(0,200,224,0.6)); }
+    }
+
+    /* WRO whale logo: wave-ride bob */
+    @keyframes bwWroBob {
+        0%,100% { transform: translateY(0) rotate(0deg); }
+        25%      { transform: translateY(-6px) rotate(-2deg); }
+        75%      { transform: translateY(4px) rotate(2deg); }
+    }
+
+    /* Apply path animations */
+    .bw-logo-wave  {
+        transform-origin: center;
+        animation: bwWaveFloat 3.2s ease-in-out infinite, bwColorShimmer 4s ease-in-out infinite;
+    }
+    .bw-logo-wave2 {
+        transform-origin: center;
+        animation: bwWaveFloat2 3.8s ease-in-out infinite 0.4s, bwColorShimmer2 4s ease-in-out infinite 1s;
+    }
+    .bw-logo-wave3 {
+        transform-origin: center;
+        animation: bwWaveFloat3 4.4s ease-in-out infinite 0.8s, bwColorShimmer3 4s ease-in-out infinite 2s;
+    }
+    .bw-logo-flame {
+        transform-origin: 288px 150px;
+        animation: bwFlamePulse 2.5s ease-in-out infinite;
+    }
+
+    /* Context-specific wrapper animations */
+    .intro-logo-wrap .bw-inline-logo .bw-svg-anim {
+        animation: bwIntroEntrance 1s cubic-bezier(0.34,1.56,0.64,1) forwards;
+    }
+    .bw-logo-wrap .bw-inline-logo .bw-svg-anim {
+        animation: bwTopbarBob 2.5s ease-in-out infinite;
+    }
+    .bw-logo-wrap .bw-inline-logo .bw-svg-anim:hover {
+        animation: bwSidebarPulse 0.6s ease-in-out 3, bwTopbarBob 2.5s ease-in-out infinite 1.8s;
+        filter: drop-shadow(0 0 8px rgba(0,200,224,0.7));
+        transition: filter 0.3s;
+    }
+    .sidebar-logo-icon .bw-inline-logo .bw-svg-anim {
+        animation: bwTopbarBob 3s ease-in-out infinite 0.5s, bwSidebarPulse 3s ease-in-out infinite;
+    }
+    .wro-whale-wrap .bw-inline-logo .bw-svg-anim {
+        animation: bwWroBob 1.5s ease-in-out infinite;
+    }
+
+    /* Size fixes so inline SVG fits correctly */
+
+    /* Intro/loading splash — match original 150x150 */
+    .intro-logo-wrap .bw-inline-logo,
+    .intro-logo-wrap .bw-svg-anim { width: 150px; height: 150px; }
+
+    /* Topbar logo — match original bw-logo-svg 50x42 */
+    .bw-logo-wrap { width: 50px; height: 42px; overflow: hidden; }
+    .bw-logo-wrap .bw-inline-logo { width: 50px; height: 42px; }
+    .bw-logo-wrap .bw-svg-anim    { width: 50px; height: 42px; }
+
+    /* Sidebar icon — constrained to icon box 38x38 */
+    .sidebar-logo-icon .bw-inline-logo { width: 34px; height: 34px; }
+    .sidebar-logo-icon .bw-svg-anim    { width: 34px; height: 34px; }
+
+    /* Wave reload overlay — match original 170x170 */
+    .wro-whale-wrap .bw-inline-logo { width: 170px; height: 170px; }
+    .wro-whale-wrap .bw-svg-anim    { width: 170px; height: 170px; }
+    </style>
+</head>
+<body>
+
+<!-- ═══ OCEAN BACKGROUND ═══ -->
+<div class="ocean-bg" id="ocean-background">
+    <div class="ocean-surface"></div>
+    <div class="light-rays"></div>
+    <div class="ruins-layer">
+        <div class="ruin ruin-arch"></div>
+        <div class="ruin ruin-col ruin-col1"></div>
+        <div class="ruin ruin-col ruin-col2"></div>
+        <div class="ruin ruin-col ruin-col3"></div>
+        <div class="ruin ruin-wall"></div>
+    </div>
+    <div class="seabed-layer">
+        <div class="coral c1"></div><div class="coral c2"></div>
+        <div class="coral c3"></div><div class="coral c4"></div>
+        <div class="seaweed s1"></div><div class="seaweed s2"></div>
+        <div class="seaweed s3"></div><div class="seaweed s4"></div>
+    </div>
+    <div id="bubbles-container"></div>
+    <div id="fish-container"></div>
+    <div id="jellyfish-container"></div>
+</div>
+
+<!-- ═══ WAVE RELOAD OVERLAY ═══ -->
+<div id="wave-reload-overlay" class="wave-reload-overlay hidden">
+    <div class="wro-deep"></div>
+    <div class="wro-whale-wrap" id="wro-whale"><span class="bw-inline-logo"><svg xmlns="http://www.w3.org/2000/svg" viewBox="80 30 420 290" class="bw-svg-anim"><g>
+<path class="bw-logo-wave" d="M 240.87 242.45 C238.47,243.29 233.57,243.95 230.00,243.92 C220.53,243.84 214.01,241.48 203.73,234.41 C192.85,226.93 181.06,223.00 169.47,223.00 L 164.32 223.00 L 161.64 214.25 C157.00,199.03 155.78,190.67 155.72,173.50 C155.65,151.18 158.98,135.91 168.28,115.97 C177.18,96.89 196.37,74.48 213.52,63.14 C240.36,45.40 270.56,37.82 302.00,40.93 C354.28,46.11 399.48,82.76 414.95,132.50 C421.16,152.46 422.78,177.74 419.08,196.85 C417.13,206.88 413.63,219.58 412.25,221.60 C411.84,222.21 408.09,222.95 403.92,223.26 C399.74,223.57 394.34,224.40 391.92,225.10 C386.85,226.58 376.79,231.76 369.52,236.64 C357.71,244.58 343.32,246.13 331.65,240.73 C328.43,239.24 322.74,235.99 319.01,233.50 C307.86,226.09 300.31,223.65 288.50,223.65 C276.76,223.65 269.54,225.97 258.03,233.41 C249.60,238.86 246.55,240.47 240.87,242.45 Z" fill="#0d6a8a"/>
+<path class="bw-logo-wave2" d="M 241.72 272.38 C235.29,274.55 223.80,274.42 217.87,272.10 C213.53,270.40 209.17,267.99 197.79,261.00 C195.20,259.41 190.94,257.38 188.32,256.49 C185.69,255.60 182.93,254.35 182.16,253.72 C180.45,252.30 173.00,240.93 173.00,239.74 C173.00,238.51 181.40,239.81 188.76,242.16 C192.20,243.26 197.82,246.09 201.26,248.44 C222.04,262.66 235.58,263.49 253.86,251.66 C269.25,241.71 279.81,238.31 292.02,239.39 C301.94,240.27 307.76,242.41 319.25,249.37 C333.04,257.73 337.80,259.50 346.50,259.48 C355.65,259.46 359.95,258.07 369.56,252.04 C382.71,243.78 389.78,240.80 399.32,239.51 C404.13,238.86 402.92,241.18 C397.87,249.16 394.60,254.01 393.29,255.07 C388.81,256.56 383.61,258.29 379.51,260.49 C369.00,267.18 361.46,271.98 354.89,274.00 C346.80,274.00 338.29,274.00 331.46,271.69 C322.13,265.66 308.04,256.54 300.78,253.92 C289.50,253.87 276.54,253.82 268.36,256.64 C253.29,266.37 249.56,268.79 244.35,271.49 C241.72,272.38 241.72,272.38 Z" fill="#0d6a8a"/>
+<path class="bw-logo-wave3" d="M 254.03 296.57 C265.91,288.04 276.94,284.02 288.50,284.02 C300.18,284.02 308.31,286.85 320.88,295.27 C329.74,301.22 330.72,301.19 344.24,294.65 L 353.50 290.17 L 347.30 290.09 C339.16,289.97 330.64,286.82 319.43,279.75 C307.30,272.12 299.91,269.72 288.50,269.72 C275.62,269.72 269.85,271.86 251.08,283.57 C244.35,287.77 236.96,289.98 229.35,290.06 L 223.50 290.13 L 231.20 293.96 C245.59,301.13 247.40,301.34 254.03,296.57 Z" fill="#0d6a8a"/>
+<path class="bw-logo-flame" d="M 299.99 201.19 C300.00,201.57 294.79,202.02 288.42,202.19 L 276.84 202.50 L 277.33 200.00 C277.59,198.62 278.58,193.62 279.51,188.87 C281.11,180.77 281.11,179.89 279.52,174.37 C278.14,169.57 276.79,167.50 272.12,163.00 C268.97,159.98 263.95,156.33 260.95,154.91 C232.07,141.17 225.88,137.10 219.85,127.88 C214.05,119.01 212.75,114.65 212.23,102.25 C211.96,96.06 212.05,91.00 212.41,91.00 C212.77,91.00 215.74,93.86 219.01,97.35 C228.16,107.13 239.76,111.96 254.30,112.03 C270.18,112.11 279.63,114.79 285.38,120.85 L 288.27 123.89 L 291.25 120.91 C292.89,119.26 295.89,117.08 297.92,116.04 C302.04,113.94 314.09,112.00 323.02,112.00 C337.00,112.00 347.36,107.71 357.24,97.83 C360.99,94.07 364.28,91.00 364.53,91.00 C365.40,91.00 365.01,105.70 363.99,111.04 C360.74,128.19 351.58,137.76 327.00,149.66 C300.92,162.30 296.39,167.20 296.68,182.50 C296.76,186.90 297.53,192.75 298.40,195.50 C299.27,198.25 299.98,200.81 299.99,201.19 Z" fill="#020202"/>
+</g></svg></span></div>
+    <div class="wro-waves">
+        <div class="wro-wave w1"></div>
+        <div class="wro-wave w2"></div>
+        <div class="wro-wave w3"></div>
+        <div class="wro-wave w4"></div>
+    </div>
+    <div class="wro-text">BLUEWAVE AI</div>
+    <div class="wro-sub">Refreshing...</div>
+</div>
+
+<!-- ═══ INTRO SPLASH ═══ -->
+<div id="intro-overlay" class="intro-overlay">
+    <div class="intro-content">
+        <div class="intro-logo-wrap"><span class="bw-inline-logo"><svg xmlns="http://www.w3.org/2000/svg" viewBox="80 30 420 290" class="bw-svg-anim"><g>
+<path class="bw-logo-wave" d="M 240.87 242.45 C238.47,243.29 233.57,243.95 230.00,243.92 C220.53,243.84 214.01,241.48 203.73,234.41 C192.85,226.93 181.06,223.00 169.47,223.00 L 164.32 223.00 L 161.64 214.25 C157.00,199.03 155.78,190.67 155.72,173.50 C155.65,151.18 158.98,135.91 168.28,115.97 C177.18,96.89 196.37,74.48 213.52,63.14 C240.36,45.40 270.56,37.82 302.00,40.93 C354.28,46.11 399.48,82.76 414.95,132.50 C421.16,152.46 422.78,177.74 419.08,196.85 C417.13,206.88 413.63,219.58 412.25,221.60 C411.84,222.21 408.09,222.95 403.92,223.26 C399.74,223.57 394.34,224.40 391.92,225.10 C386.85,226.58 376.79,231.76 369.52,236.64 C357.71,244.58 343.32,246.13 331.65,240.73 C328.43,239.24 322.74,235.99 319.01,233.50 C307.86,226.09 300.31,223.65 288.50,223.65 C276.76,223.65 269.54,225.97 258.03,233.41 C249.60,238.86 246.55,240.47 240.87,242.45 Z" fill="#0d6a8a"/>
+<path class="bw-logo-wave2" d="M 241.72 272.38 C235.29,274.55 223.80,274.42 217.87,272.10 C213.53,270.40 209.17,267.99 197.79,261.00 C195.20,259.41 190.94,257.38 188.32,256.49 C185.69,255.60 182.93,254.35 182.16,253.72 C180.45,252.30 173.00,240.93 173.00,239.74 C173.00,238.51 181.40,239.81 188.76,242.16 C192.20,243.26 197.82,246.09 201.26,248.44 C222.04,262.66 235.58,263.49 253.86,251.66 C269.25,241.71 279.81,238.31 292.02,239.39 C301.94,240.27 307.76,242.41 319.25,249.37 C333.04,257.73 337.80,259.50 346.50,259.48 C355.65,259.46 359.95,258.07 369.56,252.04 C382.71,243.78 389.78,240.80 399.32,239.51 C404.13,238.86 402.92,241.18 C397.87,249.16 394.60,254.01 393.29,255.07 C388.81,256.56 383.61,258.29 379.51,260.49 C369.00,267.18 361.46,271.98 354.89,274.00 C346.80,274.00 338.29,274.00 331.46,271.69 C322.13,265.66 308.04,256.54 300.78,253.92 C289.50,253.87 276.54,253.82 268.36,256.64 C253.29,266.37 249.56,268.79 244.35,271.49 C241.72,272.38 241.72,272.38 Z" fill="#0d6a8a"/>
+<path class="bw-logo-wave3" d="M 254.03 296.57 C265.91,288.04 276.94,284.02 288.50,284.02 C300.18,284.02 308.31,286.85 320.88,295.27 C329.74,301.22 330.72,301.19 344.24,294.65 L 353.50 290.17 L 347.30 290.09 C339.16,289.97 330.64,286.82 319.43,279.75 C307.30,272.12 299.91,269.72 288.50,269.72 C275.62,269.72 269.85,271.86 251.08,283.57 C244.35,287.77 236.96,289.98 229.35,290.06 L 223.50 290.13 L 231.20 293.96 C245.59,301.13 247.40,301.34 254.03,296.57 Z" fill="#0d6a8a"/>
+<path class="bw-logo-flame" d="M 299.99 201.19 C300.00,201.57 294.79,202.02 288.42,202.19 L 276.84 202.50 L 277.33 200.00 C277.59,198.62 278.58,193.62 279.51,188.87 C281.11,180.77 281.11,179.89 279.52,174.37 C278.14,169.57 276.79,167.50 272.12,163.00 C268.97,159.98 263.95,156.33 260.95,154.91 C232.07,141.17 225.88,137.10 219.85,127.88 C214.05,119.01 212.75,114.65 212.23,102.25 C211.96,96.06 212.05,91.00 212.41,91.00 C212.77,91.00 215.74,93.86 219.01,97.35 C228.16,107.13 239.76,111.96 254.30,112.03 C270.18,112.11 279.63,114.79 285.38,120.85 L 288.27 123.89 L 291.25 120.91 C292.89,119.26 295.89,117.08 297.92,116.04 C302.04,113.94 314.09,112.00 323.02,112.00 C337.00,112.00 347.36,107.71 357.24,97.83 C360.99,94.07 364.28,91.00 364.53,91.00 C365.40,91.00 365.01,105.70 363.99,111.04 C360.74,128.19 351.58,137.76 327.00,149.66 C300.92,162.30 296.39,167.20 296.68,182.50 C296.76,186.90 297.53,192.75 298.40,195.50 C299.27,198.25 299.98,200.81 299.99,201.19 Z" fill="#020202"/>
+</g></svg></span></div>
+        <h1 class="intro-title">BLUEWAVE AI</h1>
+        <p class="intro-sub">Professional Medical Intelligence System</p>
+        <div class="intro-dots"><span></span><span></span><span></span></div>
+    </div>
+</div>
+
+<!-- ═══ APP SHELL ═══ -->
+<div class="app-shell">
+
+    <header class="topbar">
+        <div class="topbar-brand" id="topbar-brand-btn" title="Click to refresh">
+            <div class="bw-logo-wrap"><span class="bw-inline-logo"><svg xmlns="http://www.w3.org/2000/svg" viewBox="80 30 420 290" class="bw-svg-anim"><g>
+<path class="bw-logo-wave" d="M 240.87 242.45 C238.47,243.29 233.57,243.95 230.00,243.92 C220.53,243.84 214.01,241.48 203.73,234.41 C192.85,226.93 181.06,223.00 169.47,223.00 L 164.32 223.00 L 161.64 214.25 C157.00,199.03 155.78,190.67 155.72,173.50 C155.65,151.18 158.98,135.91 168.28,115.97 C177.18,96.89 196.37,74.48 213.52,63.14 C240.36,45.40 270.56,37.82 302.00,40.93 C354.28,46.11 399.48,82.76 414.95,132.50 C421.16,152.46 422.78,177.74 419.08,196.85 C417.13,206.88 413.63,219.58 412.25,221.60 C411.84,222.21 408.09,222.95 403.92,223.26 C399.74,223.57 394.34,224.40 391.92,225.10 C386.85,226.58 376.79,231.76 369.52,236.64 C357.71,244.58 343.32,246.13 331.65,240.73 C328.43,239.24 322.74,235.99 319.01,233.50 C307.86,226.09 300.31,223.65 288.50,223.65 C276.76,223.65 269.54,225.97 258.03,233.41 C249.60,238.86 246.55,240.47 240.87,242.45 Z" fill="#0d6a8a"/>
+<path class="bw-logo-wave2" d="M 241.72 272.38 C235.29,274.55 223.80,274.42 217.87,272.10 C213.53,270.40 209.17,267.99 197.79,261.00 C195.20,259.41 190.94,257.38 188.32,256.49 C185.69,255.60 182.93,254.35 182.16,253.72 C180.45,252.30 173.00,240.93 173.00,239.74 C173.00,238.51 181.40,239.81 188.76,242.16 C192.20,243.26 197.82,246.09 201.26,248.44 C222.04,262.66 235.58,263.49 253.86,251.66 C269.25,241.71 279.81,238.31 292.02,239.39 C301.94,240.27 307.76,242.41 319.25,249.37 C333.04,257.73 337.80,259.50 346.50,259.48 C355.65,259.46 359.95,258.07 369.56,252.04 C382.71,243.78 389.78,240.80 399.32,239.51 C404.13,238.86 402.92,241.18 C397.87,249.16 394.60,254.01 393.29,255.07 C388.81,256.56 383.61,258.29 379.51,260.49 C369.00,267.18 361.46,271.98 354.89,274.00 C346.80,274.00 338.29,274.00 331.46,271.69 C322.13,265.66 308.04,256.54 300.78,253.92 C289.50,253.87 276.54,253.82 268.36,256.64 C253.29,266.37 249.56,268.79 244.35,271.49 C241.72,272.38 241.72,272.38 Z" fill="#0d6a8a"/>
+<path class="bw-logo-wave3" d="M 254.03 296.57 C265.91,288.04 276.94,284.02 288.50,284.02 C300.18,284.02 308.31,286.85 320.88,295.27 C329.74,301.22 330.72,301.19 344.24,294.65 L 353.50 290.17 L 347.30 290.09 C339.16,289.97 330.64,286.82 319.43,279.75 C307.30,272.12 299.91,269.72 288.50,269.72 C275.62,269.72 269.85,271.86 251.08,283.57 C244.35,287.77 236.96,289.98 229.35,290.06 L 223.50 290.13 L 231.20 293.96 C245.59,301.13 247.40,301.34 254.03,296.57 Z" fill="#0d6a8a"/>
+<path class="bw-logo-flame" d="M 299.99 201.19 C300.00,201.57 294.79,202.02 288.42,202.19 L 276.84 202.50 L 277.33 200.00 C277.59,198.62 278.58,193.62 279.51,188.87 C281.11,180.77 281.11,179.89 279.52,174.37 C278.14,169.57 276.79,167.50 272.12,163.00 C268.97,159.98 263.95,156.33 260.95,154.91 C232.07,141.17 225.88,137.10 219.85,127.88 C214.05,119.01 212.75,114.65 212.23,102.25 C211.96,96.06 212.05,91.00 212.41,91.00 C212.77,91.00 215.74,93.86 219.01,97.35 C228.16,107.13 239.76,111.96 254.30,112.03 C270.18,112.11 279.63,114.79 285.38,120.85 L 288.27 123.89 L 291.25 120.91 C292.89,119.26 295.89,117.08 297.92,116.04 C302.04,113.94 314.09,112.00 323.02,112.00 C337.00,112.00 347.36,107.71 357.24,97.83 C360.99,94.07 364.28,91.00 364.53,91.00 C365.40,91.00 365.01,105.70 363.99,111.04 C360.74,128.19 351.58,137.76 327.00,149.66 C300.92,162.30 296.39,167.20 296.68,182.50 C296.76,186.90 297.53,192.75 298.40,195.50 C299.27,198.25 299.98,200.81 299.99,201.19 Z" fill="#020202"/>
+</g></svg></span></div>
+            <div class="topbar-brand-text">
+                <span class="topbar-title">BLUEWAVE</span>
+                <span class="topbar-badge">AI Medical</span>
+            </div>
+        </div>
+
+        <nav class="topbar-nav">
+            <button class="tnav active" data-tab="chat"><i class="fas fa-comments"></i><span>Chat</span></button>
+            <button class="tnav" data-tab="dashboard"><i class="fas fa-chart-line"></i><span>Dashboard</span></button>
+            <button class="tnav" data-tab="disease"><i class="fas fa-notes-medical"></i><span>A-Z</span></button>
+            <button class="tnav" data-tab="tools"><i class="fas fa-ruler-combined"></i><span>Tools</span></button>
+            <button class="tnav" data-tab="awareness"><i class="fas fa-shield-heart"></i><span>Awareness</span></button>
+            <button class="tnav" data-tab="hospitals"><i class="fas fa-hospital-alt"></i><span>Hospitals</span></button>
+            <button class="tnav" data-tab="resources"><i class="fas fa-book-medical"></i><span>Resources</span></button>
+            <button class="tnav" data-tab="reminders"><i class="fas fa-bell"></i><span>Reminders</span></button>
+        </nav>
+
+        <div class="topbar-right">
+            <div class="ai-status"><span class="ai-dot"></span><span>AI Online</span></div>
+            <button class="profile-btn" id="profile-avatar-btn" title="My Profile">
+                <div class="profile-btn-avatar" id="profile-initials"><span id="topbar-avatar-emoji" style="font-size:1.3rem;">👤</span></div>
+                <div class="profile-btn-info">
+                    <span class="profile-btn-name" id="topbar-username">Guest</span>
+                    <span class="profile-btn-sub">View Profile</span>
+                </div>
+                <i class="fas fa-chevron-down profile-btn-chevron"></i>
+            </button>
+        </div>
+    </header>
+
+    <div class="app-body">
+        <aside class="sidebar">
+            <div class="sidebar-logo-row">
+                <div class="sidebar-logo-icon"><span class="bw-inline-logo"><svg xmlns="http://www.w3.org/2000/svg" viewBox="80 30 420 290" class="bw-svg-anim"><g>
+<path class="bw-logo-wave" d="M 240.87 242.45 C238.47,243.29 233.57,243.95 230.00,243.92 C220.53,243.84 214.01,241.48 203.73,234.41 C192.85,226.93 181.06,223.00 169.47,223.00 L 164.32 223.00 L 161.64 214.25 C157.00,199.03 155.78,190.67 155.72,173.50 C155.65,151.18 158.98,135.91 168.28,115.97 C177.18,96.89 196.37,74.48 213.52,63.14 C240.36,45.40 270.56,37.82 302.00,40.93 C354.28,46.11 399.48,82.76 414.95,132.50 C421.16,152.46 422.78,177.74 419.08,196.85 C417.13,206.88 413.63,219.58 412.25,221.60 C411.84,222.21 408.09,222.95 403.92,223.26 C399.74,223.57 394.34,224.40 391.92,225.10 C386.85,226.58 376.79,231.76 369.52,236.64 C357.71,244.58 343.32,246.13 331.65,240.73 C328.43,239.24 322.74,235.99 319.01,233.50 C307.86,226.09 300.31,223.65 288.50,223.65 C276.76,223.65 269.54,225.97 258.03,233.41 C249.60,238.86 246.55,240.47 240.87,242.45 Z" fill="#0d6a8a"/>
+<path class="bw-logo-wave2" d="M 241.72 272.38 C235.29,274.55 223.80,274.42 217.87,272.10 C213.53,270.40 209.17,267.99 197.79,261.00 C195.20,259.41 190.94,257.38 188.32,256.49 C185.69,255.60 182.93,254.35 182.16,253.72 C180.45,252.30 173.00,240.93 173.00,239.74 C173.00,238.51 181.40,239.81 188.76,242.16 C192.20,243.26 197.82,246.09 201.26,248.44 C222.04,262.66 235.58,263.49 253.86,251.66 C269.25,241.71 279.81,238.31 292.02,239.39 C301.94,240.27 307.76,242.41 319.25,249.37 C333.04,257.73 337.80,259.50 346.50,259.48 C355.65,259.46 359.95,258.07 369.56,252.04 C382.71,243.78 389.78,240.80 399.32,239.51 C404.13,238.86 402.92,241.18 C397.87,249.16 394.60,254.01 393.29,255.07 C388.81,256.56 383.61,258.29 379.51,260.49 C369.00,267.18 361.46,271.98 354.89,274.00 C346.80,274.00 338.29,274.00 331.46,271.69 C322.13,265.66 308.04,256.54 300.78,253.92 C289.50,253.87 276.54,253.82 268.36,256.64 C253.29,266.37 249.56,268.79 244.35,271.49 C241.72,272.38 241.72,272.38 Z" fill="#0d6a8a"/>
+<path class="bw-logo-wave3" d="M 254.03 296.57 C265.91,288.04 276.94,284.02 288.50,284.02 C300.18,284.02 308.31,286.85 320.88,295.27 C329.74,301.22 330.72,301.19 344.24,294.65 L 353.50 290.17 L 347.30 290.09 C339.16,289.97 330.64,286.82 319.43,279.75 C307.30,272.12 299.91,269.72 288.50,269.72 C275.62,269.72 269.85,271.86 251.08,283.57 C244.35,287.77 236.96,289.98 229.35,290.06 L 223.50 290.13 L 231.20 293.96 C245.59,301.13 247.40,301.34 254.03,296.57 Z" fill="#0d6a8a"/>
+<path class="bw-logo-flame" d="M 299.99 201.19 C300.00,201.57 294.79,202.02 288.42,202.19 L 276.84 202.50 L 277.33 200.00 C277.59,198.62 278.58,193.62 279.51,188.87 C281.11,180.77 281.11,179.89 279.52,174.37 C278.14,169.57 276.79,167.50 272.12,163.00 C268.97,159.98 263.95,156.33 260.95,154.91 C232.07,141.17 225.88,137.10 219.85,127.88 C214.05,119.01 212.75,114.65 212.23,102.25 C211.96,96.06 212.05,91.00 212.41,91.00 C212.77,91.00 215.74,93.86 219.01,97.35 C228.16,107.13 239.76,111.96 254.30,112.03 C270.18,112.11 279.63,114.79 285.38,120.85 L 288.27 123.89 L 291.25 120.91 C292.89,119.26 295.89,117.08 297.92,116.04 C302.04,113.94 314.09,112.00 323.02,112.00 C337.00,112.00 347.36,107.71 357.24,97.83 C360.99,94.07 364.28,91.00 364.53,91.00 C365.40,91.00 365.01,105.70 363.99,111.04 C360.74,128.19 351.58,137.76 327.00,149.66 C300.92,162.30 296.39,167.20 296.68,182.50 C296.76,186.90 297.53,192.75 298.40,195.50 C299.27,198.25 299.98,200.81 299.99,201.19 Z" fill="#020202"/>
+</g></svg></span></div>
+                <div>
+                    <div class="sidebar-logo-name">BLUEWAVE</div>
+                    <div class="sidebar-logo-sub">HEALTH SYSTEM</div>
+                </div>
+            </div>
+            <div class="sidebar-sep"></div>
+            <p class="sidebar-label">MAIN MENU</p>
+            <button class="snav active" data-tab="chat"><span class="snav-icon"><i class="fas fa-comments"></i></span><span>Health Chat</span><span class="snav-tag">AI</span></button>
+            <button class="snav" data-tab="dashboard"><span class="snav-icon"><i class="fas fa-chart-line"></i></span><span>Dashboard</span></button>
+            <button class="snav" data-tab="disease"><span class="snav-icon"><i class="fas fa-notes-medical"></i></span><span>Disease A-Z</span></button>
+            <button class="snav" data-tab="tools"><span class="snav-icon"><i class="fas fa-ruler-combined"></i></span><span>Health Tools</span></button>
+            <button class="snav" data-tab="awareness"><span class="snav-icon"><i class="fas fa-shield-heart"></i></span><span>Awareness</span></button>
+            <button class="snav" data-tab="hospitals"><span class="snav-icon"><i class="fas fa-hospital-alt"></i></span><span>Nearby Hospitals</span></button>
+            <button class="snav" data-tab="resources"><span class="snav-icon"><i class="fas fa-book-medical"></i></span><span>Resources</span></button>
+            <button class="snav" data-tab="reminders"><span class="snav-icon"><i class="fas fa-bell"></i></span><span>Reminders</span></button>
+            <div class="sidebar-sep"></div>
+            <p class="sidebar-label">WELLNESS</p>
+            <button class="snav snav-motivation" id="motivation-btn"><span class="snav-icon"><i class="fas fa-star"></i></span><span>Motivation Boost</span></button>
+            <button class="snav snav-guide" id="guide-btn"><span class="snav-icon"><i class="fas fa-compass"></i></span><span>How To Use</span></button>
+            <div class="sidebar-footer"><i class="fas fa-shield-alt"></i><p>For health awareness only. Not medical advice.</p></div>
+        </aside>
+
+        <main class="main-content">
+
+            <!-- GUIDE TAB -->
+            <div class="content-tab" id="guide-tab">
+                <div class="tab-header">
+                    <div class="tab-header-left">
+                        <div class="tab-icon-wrap" style="background:linear-gradient(135deg,#0e7090,#062040)"><i class="fas fa-compass"></i></div>
+                        <div><h2>Welcome to BLUEWAVE AI</h2><p>Your complete health intelligence companion</p></div>
+                    </div>
+                    <button class="btn-close-tab" id="guide-close-btn"><i class="fas fa-arrow-left"></i> Back</button>
+                </div>
+                <div class="tab-scroll-body">
+                    <div class="guide-hero">
+                        <svg class="guide-whale" viewBox="0 0 200 110" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M12 62 Q4 46 2 34 Q12 42 18 37 Q15 50 22 60Z" fill="#1565c0"/>
+                          <ellipse cx="100" cy="62" rx="82" ry="35" fill="#1976d2"/>
+                          <ellipse cx="114" cy="72" rx="58" ry="18" fill="#42a5f5" opacity="0.55"/>
+                          <path d="M82 24 Q102 2 124 20 Q108 28 100 30Z" fill="#1565c0"/>
+                          <circle cx="114" cy="54" r="4.5" fill="#00e5ff" opacity="0.9"/>
+                          <circle cx="132" cy="46" r="3" fill="#00e5ff" opacity="0.75"/>
+                          <line x1="96" y1="51" x2="114" y2="54" stroke="#00e5ff" stroke-width="1.5" opacity="0.8"/>
+                          <line x1="114" y1="54" x2="132" y2="46" stroke="#00e5ff" stroke-width="1.5" opacity="0.8"/>
+                          <rect x="74" y="54" width="17" height="4.5" rx="2.2" fill="white" opacity="0.9"/>
+                          <rect x="80" y="48" width="4.5" height="17" rx="2.2" fill="white" opacity="0.9"/>
+                          <circle cx="166" cy="60" r="10" fill="#0d47a1"/>
+                          <circle cx="166" cy="60" r="6" fill="#e3f2fd"/>
+                          <circle cx="167" cy="59" r="2.8" fill="#1a1a2e"/>
+                          <circle cx="168" cy="58" r="1.1" fill="white"/>
+                          <path d="M174 48 Q182 24 178 10 Q174 22 169 14 Q173 28 169 48Z" fill="#00e5ff" opacity="0.65"/>
+                          <path d="M154 72 Q164 82 176 76" stroke="#1565c0" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+                        </svg>
+                        <div class="guide-hero-text">
+                            <h2>Hello! I'm BLUEWAVE AI 🌊</h2>
+                            <p>Your AI-powered medical information assistant. Here's everything you can do:</p>
+                        </div>
+                    </div>
+                    <div class="guide-cards">
+                        <div class="guide-card"><div class="guide-card-icon" style="background:rgba(0,229,255,0.12);color:#00e5ff"><i class="fas fa-comments"></i></div><h4>Health Chat</h4><p>Ask about any disease, symptom, or health concern. Type a condition name like <em>"fever"</em>, <em>"diabetes"</em>, or <em>"dengue"</em> for a full clinical overview.</p></div>
+                        <div class="guide-card"><div class="guide-card-icon" style="background:rgba(231,76,60,0.12);color:#e74c3c"><i class="fas fa-hospital-alt"></i></div><h4>Nearby Hospitals</h4><p>Find healthcare facilities within 5km using live GPS. Uses multiple data sources for maximum accuracy. Click <strong>Find Hospitals</strong> and allow location access.</p></div>
+                        <div class="guide-card"><div class="guide-card-icon" style="background:rgba(39,174,96,0.12);color:#27ae60"><i class="fas fa-book-medical"></i></div><h4>Health Resources</h4><p>Curated links to trusted medical databases — Mayo Clinic, PubMed, WHO, NIH, Red Cross, CDC, Sleep Foundation and more.</p></div>
+                        <div class="guide-card"><div class="guide-card-icon" style="background:rgba(155,89,182,0.12);color:#9b59b6"><i class="fas fa-bell"></i></div><h4>Smart Reminders</h4><p>Set medicine, water, exercise, sleep and meal reminders. Email reminders sent to your registered address. Requires a saved profile with email.</p></div>
+                        <div class="guide-card"><div class="guide-card-icon" style="background:rgba(230,126,34,0.12);color:#e67e22"><i class="fas fa-star"></i></div><h4>Motivation Boost</h4><p>Daily health motivation, anti-drug slogans, and a curated list of recovery and support resources from trusted organisations worldwide.</p></div>
+                        <div class="guide-card"><div class="guide-card-icon" style="background:rgba(26,188,156,0.12);color:#1abc9c"><i class="fas fa-user-circle"></i></div><h4>Your Profile</h4><p>Save your name, age, gender, email, medical conditions, and allergies. Choose from gender-specific avatars. Your email unlocks the reminders feature.</p></div>
+                    </div>
+                    <div class="guide-tips">
+                        <div class="guide-tips-title"><i class="fas fa-lightbulb"></i> Quick Tips</div>
+                        <div class="guide-tips-list">
+                            <div class="guide-tip"><span class="gt-num">1</span><span>Type <code>tip</code> in chat for a random evidence-based health recommendation</span></div>
+                            <div class="guide-tip"><span class="gt-num">2</span><span>Type <code>emergency</code> for immediate emergency contact numbers worldwide</span></div>
+                            <div class="guide-tip"><span class="gt-num">3</span><span>Type <code>drug awareness</code> for substance abuse information and helplines</span></div>
+                            <div class="guide-tip"><span class="gt-num">4</span><span>Click the <strong>BLUEWAVE</strong> logo top-left to reload with a whale animation</span></div>
+                            <div class="guide-tip"><span class="gt-num">5</span><span>Set up your profile first to unlock personalised email reminders and avatars</span></div>
+                        </div>
+                    </div>
+                    <div class="guide-disclaimer"><i class="fas fa-exclamation-triangle"></i><div><strong>Medical Disclaimer:</strong> BLUEWAVE AI provides general health information and educational content only. It is <em>not</em> a substitute for professional medical advice, diagnosis, or treatment. Always consult a qualified healthcare professional for medical decisions.</div></div>
+                    <div style="text-align:center;padding:24px 0 8px;">
+                        <button class="btn-primary" id="guide-start-btn" style="margin:0 auto;font-size:1rem;padding:14px 36px;"><i class="fas fa-rocket"></i> Get Started →</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PROFILE TAB -->
+            <div class="content-tab" id="profile-tab">
+                <div class="tab-header">
+                    <div class="tab-header-left">
+                        <div class="tab-icon-wrap"><i class="fas fa-user-circle"></i></div>
+                        <div><h2>Patient Profile</h2><p>Manage your personal health record</p></div>
+                    </div>
+                    <button class="btn-close-tab" id="profile-close-btn"><i class="fas fa-arrow-left"></i> Back</button>
+                </div>
+                <div class="tab-scroll-body">
+                    <div id="profile-form-section" class="pf-section active">
+                        <form id="profileForm">
+                            <div class="form-grid">
+                                <div class="form-group"><label><i class="fas fa-user"></i> Full Name</label><input type="text" id="fullName" placeholder="Your full name" required></div>
+                                <div class="form-group"><label><i class="fas fa-birthday-cake"></i> Age</label><input type="number" id="age" placeholder="Your age" min="0" max="150" required></div>
+                                <div class="form-group">
+                                    <label><i class="fas fa-venus-mars"></i> Gender</label>
+                                    <select id="gender" required>
+                                        <option value="" disabled selected>Select gender</option>
+                                        <option>Female</option><option>Male</option><option>Non-binary</option><option>Prefer not to say</option>
+                                    </select>
+                                </div>
+                                <div class="form-group"><label><i class="fas fa-envelope"></i> Email <span style="color:var(--cyan);font-size:.7rem;">(for reminders)</span></label><input type="email" id="contactEmail" placeholder="you@example.com" required></div>
+                                <div class="form-group full-width"><label><i class="fas fa-stethoscope"></i> Medical Conditions</label><textarea id="medicalConditions" placeholder="E.g., diabetes, hypertension..." rows="3"></textarea></div>
+                                <div class="form-group full-width"><label><i class="fas fa-allergies"></i> Known Allergies</label><textarea id="allergies" placeholder="E.g., penicillin, peanuts..." rows="3"></textarea></div>
+                            </div>
+                            <div class="avatar-picker-section" id="avatar-picker-section">
+                                <div class="avatar-picker-label"><i class="fas fa-id-badge"></i> Choose Your Avatar <span id="avatar-picker-hint" style="font-size:.72rem;color:var(--muted);font-weight:400;">(select gender first)</span></div>
+                                <div class="avatar-grid" id="avatar-grid"></div>
+                            </div>
+                            <div class="form-actions">
+                                <button type="button" class="btn-ghost" id="cancel-profile"><i class="fas fa-times"></i> Cancel</button>
+                                <button type="submit" class="btn-primary"><i class="fas fa-save"></i> Save Profile</button>
+                            </div>
+                        </form>
+                    </div>
+                    <div id="profile-display" class="pd-section">
+                        <div class="pd-card-header">
+                            <div class="pd-avatar" id="pd-avatar-display"><span id="pd-avatar-emoji" style="font-size:2.8rem;">👤</span></div>
+                            <div class="pd-name-block">
+                                <h3 id="display-name">No Name</h3>
+                                <p id="display-age-gender">Age: — | Gender: —</p>
+                                <span class="pd-saved-badge"><i class="fas fa-check-circle"></i> Saved</span>
+                            </div>
+                            <div class="pd-header-actions">
+                                <button class="btn-outline" id="edit-profile"><i class="fas fa-edit"></i> Edit</button>
+                                <button class="btn-download-report" id="download-report-btn" title="Download your full health report"><i class="fas fa-file-medical-alt"></i> Download Report</button>
+                            </div>
+                        </div>
+                        <div class="pd-info-grid">
+                            <div class="pd-info-card"><div class="pd-info-label"><i class="fas fa-envelope"></i> Email</div><div class="pd-info-value" id="display-email">—</div></div>
+                            <div class="pd-info-card"><div class="pd-info-label"><i class="fas fa-stethoscope"></i> Medical Conditions</div><div class="pd-info-value" id="display-conditions">None</div></div>
+                            <div class="pd-info-card"><div class="pd-info-label"><i class="fas fa-allergies"></i> Allergies</div><div class="pd-info-value" id="display-allergies">None</div></div>
+                            <div class="pd-info-card"><div class="pd-info-label"><i class="fas fa-id-badge"></i> Avatar</div><div class="pd-info-value" id="display-avatar-name">—</div></div>
+                            <div class="pd-info-card pd-info-card--full"><div class="pd-info-label"><i class="fas fa-history"></i> Profile Save History</div><div class="pd-history-list" id="display-history"><span style="color:var(--muted);font-size:.82rem;">No history yet</span></div></div>
+                        </div>
+                        <div class="pd-report-hint"><i class="fas fa-info-circle"></i> Your downloadable report includes your profile, chat history, and personalised precautions based on your medical conditions.</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CHAT TAB -->
+            <div class="content-tab active" id="chat-tab">
+                <div class="chat-header">
+                    <div class="chat-bot-info">
+                        <div class="chat-bot-avatar"><i class="fas fa-robot"></i><span class="bot-live-dot"></span></div>
+                        <div><h2>BLUEWAVE AI Assistant</h2><p>Evidence-based health information & guidance</p></div>
+                    </div>
+                    <div class="chat-header-actions">
+                        <div class="chat-language-wrap">
+                            <label for="chat-language-select" class="chat-language-label">Disease answer language</label>
+                            <select id="chat-language-select" class="chat-language-select">
+                                <option value="en" selected>English</option>
+                                <option value="hi">Hindi</option>
+                                <option value="gu">Gujarati</option>
+                            </select>
+                        </div>
+                        <button class="chat-action-btn" id="clear-chat-btn" title="Clear Chat"><i class="fas fa-trash-alt"></i></button>
+                    </div>
+                </div>
+                <div id="chat-messages" class="chat-messages">
+                    <div class="chat-welcome-banner">
+                        <div class="cwb-icon"><i class="fas fa-water"></i></div>
+                        <div class="cwb-text"><strong>BLUEWAVE AI is ready</strong><span>Ask about diseases, symptoms, or type "tip" for a health recommendation</span></div>
+                    </div>
+                    <div class="message bot-message">
+                        <div class="msg-avatar"><i class="fas fa-robot"></i></div>
+                        <div class="msg-content">
+                            <div class="msg-bubble"><p>🌊 Welcome to <strong>BLUEWAVE AI</strong>! I provide evidence-based medical information and health guidance.<br><br>Try asking about a symptom or disease, or use the quick buttons below.</p></div>
+                            <div class="msg-time">Just now</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="quick-chips">
+                    <button class="chip" data-query="tip"><i class="fas fa-lightbulb"></i> Health Tip</button>
+                    <button class="chip" data-query="symptoms"><i class="fas fa-stethoscope"></i> Symptoms</button>
+                    <button class="chip" data-query="drug awareness"><i class="fas fa-ban"></i> Drug Awareness</button>
+                    <button class="chip" data-query="emergency"><i class="fas fa-ambulance"></i> Emergency</button>
+                    <button class="chip" data-query="fever"><i class="fas fa-thermometer-half"></i> Fever</button>
+                    <button class="chip" data-query="diabetes"><i class="fas fa-syringe"></i> Diabetes</button>
+                </div>
+                <div class="chat-input-bar">
+                    <div class="chat-input-wrap">
+                        <i class="fas fa-comment-medical chat-icon-left"></i>
+                        <input type="text" id="user-input" placeholder="Ask about any health concern..." autocomplete="off" />
+                        <button id="mic-button" class="mic-btn" title="Speak your question"><i class="fas fa-microphone"></i></button>
+                        <button id="send-button" class="send-btn"><i class="fas fa-paper-plane"></i></button>
+                    </div>
+                    <p class="input-disclaimer">AI responses are for awareness only — always consult a licensed doctor. <span id="mic-status" class="mic-status"></span></p>
+                </div>
+            </div>
+
+            
+            <!-- DASHBOARD TAB -->
+            <div class="content-tab" id="dashboard-tab">
+                <div class="tab-header">
+                    <div class="tab-header-left">
+                        <div class="tab-icon-wrap"><i class="fas fa-chart-line"></i></div>
+                        <div><h2>Health Dashboard</h2><p>Track your everyday wellness in one place</p></div>
+                    </div>
+                </div>
+                <div class="tab-scroll-body">
+                    <div class="dashboard-connect-card">
+                        <div>
+                            <h3>Connect your phone</h3>
+                            <p>Sync your mobile health apps and wearables to use activity-based services.</p>
+                        </div>
+                        <button class="primary-action-btn" id="connect-phone-btn"><i class="fas fa-mobile-screen-button"></i> Connect Phone</button>
+                    </div>
+                    <div class="dashboard-grid">
+                        <div class="metric-card"><span class="metric-label">Steps</span><span class="metric-value" id="stepsMetric">8,240</span><span class="metric-sub">Daily walking progress</span></div>
+                        <div class="metric-card"><span class="metric-label">Calories Burned</span><span class="metric-value" id="caloriesMetric">486 kcal</span><span class="metric-sub">Estimated active burn</span></div>
+                        <div class="metric-card"><span class="metric-label">Hydration</span><span class="metric-value">1.8 L</span><span class="metric-sub">Water consumed today</span></div>
+                        <div class="metric-card"><span class="metric-label">Sleep</span><span class="metric-value">7h 24m</span><span class="metric-sub">Last recorded sleep</span></div>
+                        <div class="metric-card"><span class="metric-label">Heart Rate</span><span class="metric-value">74 bpm</span><span class="metric-sub">Resting heart rate</span></div>
+                        <div class="metric-card"><span class="metric-label">Active Minutes</span><span class="metric-value">42 min</span><span class="metric-sub">Moderate activity today</span></div>
+                    </div>
+                    <div class="dashboard-note-card">
+                        <h3>What this dashboard is for</h3>
+                        <p>This section helps users turn health information into daily action. Logical metrics like steps, calories, hydration, sleep, and heart rate make the experience practical and useful.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- DISEASE A-Z TAB -->
+            <div class="content-tab" id="disease-tab">
+                <div class="tab-header">
+                    <div class="tab-header-left">
+                        <div class="tab-icon-wrap"><i class="fas fa-notes-medical"></i></div>
+                        <div><h2>Disease A-Z</h2><p>Quick medical reference arranged for easy lookup</p></div>
+                    </div>
+                </div>
+                <div class="tab-scroll-body">
+                    <div class="disease-search-bar">
+                        <input type="text" id="disease-search-input" placeholder="Search disease name..." />
+                    </div>
+                    <div id="disease-az-grid" class="disease-az-grid"></div>
+                </div>
+            </div>
+
+            <!-- HEALTH TOOLS TAB -->
+            <div class="content-tab" id="tools-tab">
+                <div class="tab-header">
+                    <div class="tab-header-left">
+                        <div class="tab-icon-wrap"><i class="fas fa-ruler-combined"></i></div>
+                        <div><h2>Health Tools</h2><p>Simple tools for everyday wellness awareness</p></div>
+                    </div>
+                </div>
+                <div class="tab-scroll-body">
+                    <div class="tools-grid">
+                        <div class="tool-card">
+                            <h3>BMI Calculator</h3>
+                            <div class="tool-fields">
+                                <input type="number" id="bmi-height" placeholder="Height in cm" />
+                                <input type="number" id="bmi-weight" placeholder="Weight in kg" />
+                            </div>
+                            <button class="primary-action-btn" id="calc-bmi-btn">Calculate BMI</button>
+                            <p class="tool-result" id="bmi-result">Enter height and weight to calculate.</p>
+                        </div>
+                        <div class="tool-card">
+                            <h3>Daily Water Intake</h3>
+                            <div class="tool-fields">
+                                <input type="number" id="water-weight" placeholder="Weight in kg" />
+                            </div>
+                            <button class="primary-action-btn" id="calc-water-btn">Estimate Water Intake</button>
+                            <p class="tool-result" id="water-result">Enter weight to estimate recommended intake.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- AWARENESS TAB -->
+            <div class="content-tab" id="awareness-tab">
+                <div class="tab-header">
+                    <div class="tab-header-left">
+                        <div class="tab-icon-wrap"><i class="fas fa-shield-heart"></i></div>
+                        <div><h2>Health Awareness</h2><p>Important preventive guidance that people should know</p></div>
+                    </div>
+                </div>
+                <div class="tab-scroll-body">
+                    <div class="awareness-grid">
+                        <div class="awareness-card"><h3>Hand Hygiene</h3><p>Washing hands with soap for 20 seconds helps reduce transmission of many common infections.</p></div>
+                        <div class="awareness-card"><h3>Vaccination</h3><p>Keeping vaccinations updated helps prevent serious infectious diseases and protects the community.</p></div>
+                        <div class="awareness-card"><h3>Heat Safety</h3><p>Hydration, avoiding peak heat, and wearing light clothing reduce the risk of dehydration and heatstroke.</p></div>
+                        <div class="awareness-card"><h3>Mental Health</h3><p>Persistent low mood, anxiety, sleep problems, or hopelessness deserve attention and professional support.</p></div>
+                        <div class="awareness-card"><h3>Stroke FAST Signs</h3><p>Face drooping, arm weakness, speech difficulty, and time to act quickly are life-saving warning signs.</p></div>
+                        <div class="awareness-card"><h3>Heart Health</h3><p>Regular walking, lower salt intake, smoking avoidance, and blood pressure checks reduce long-term risk.</p></div>
+                    </div>
+                </div>
+            </div>
+
+
+            <!-- HOSPITALS TAB -->
+            <div class="content-tab" id="hospitals-tab">
+                <div class="tab-header">
+                    <div class="tab-header-left">
+                        <div class="tab-icon-wrap red-icon"><i class="fas fa-hospital-alt"></i></div>
+                        <div><h2>Nearby Healthcare Facilities</h2><p>Find hospitals and clinics near your current location</p></div>
+                    </div>
+                    <button class="find-btn" id="find-hospitals-btn"><i class="fas fa-location-arrow"></i> Find Hospitals</button>
+                </div>
+                <div class="hospitals-scroll-body">
+                    <div class="hosp-info-banner"><i class="fas fa-info-circle"></i><span>Uses OpenStreetMap + multiple fallback APIs. Shows hospitals, clinics &amp; doctors within <strong>10km</strong>. Allow location when prompted.</span></div>
+                    <div class="map-wrap">
+                        <div id="map">
+                            <div class="map-placeholder-ui" id="map-placeholder">
+                                <i class="fas fa-map-marked-alt"></i>
+                                <h3>Location Not Set</h3>
+                                <p>Click <strong>Find Hospitals</strong> above to enable your location</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="hosp-results-section">
+                        <div class="hosp-results-bar">
+                            <span class="hosp-results-title"><i class="fas fa-list-alt"></i> Hospital List</span>
+                            <span class="hosp-count-badge" id="hospital-count"></span>
+                        </div>
+                        <div id="hospital-results">
+                            <div class="hosp-empty-state"><i class="fas fa-hospital-alt"></i><h3>No Results Yet</h3><p>Allow location access and click "Find Hospitals" to discover nearby healthcare facilities.</p></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- RESOURCES TAB -->
+            <div class="content-tab" id="resources-tab">
+                <div class="tab-header">
+                    <div class="tab-header-left">
+                        <div class="tab-icon-wrap green-icon"><i class="fas fa-book-medical"></i></div>
+                        <div><h2>Health Resources</h2><p>Curated educational materials and medical references</p></div>
+                    </div>
+                </div>
+                <div class="tab-scroll-body">
+                    <div class="res-section"><div class="res-section-title"><i class="fas fa-heartbeat"></i> Medical Guides</div>
+                        <div class="res-grid">
+                            <a href="https://www.heart.org/en/health-topics/consumer-healthcare" target="_blank" class="res-card"><div class="res-card-icon" style="background:rgba(231,76,60,0.15);color:#e74c3c"><i class="fas fa-heartbeat"></i></div><div class="res-card-body"><h4>Cardiology Guide</h4><p>Heart health, cardiovascular prevention, and treatment options.</p></div><i class="fas fa-external-link-alt res-card-link"></i></a>
+                            <a href="https://www.lung.org/lung-health-diseases" target="_blank" class="res-card"><div class="res-card-icon" style="background:rgba(52,152,219,0.15);color:#3498db"><i class="fas fa-lungs"></i></div><div class="res-card-body"><h4>Respiratory Health</h4><p>Asthma, COPD, and lung conditions with care guidelines.</p></div><i class="fas fa-external-link-alt res-card-link"></i></a>
+                            <a href="https://www.apa.org/topics" target="_blank" class="res-card"><div class="res-card-icon" style="background:rgba(155,89,182,0.15);color:#9b59b6"><i class="fas fa-brain"></i></div><div class="res-card-body"><h4>Mental Health</h4><p>Wellness, stress management, and psychological conditions.</p></div><i class="fas fa-external-link-alt res-card-link"></i></a>
+                            <a href="https://www.who.int/health-topics/diabetes" target="_blank" class="res-card"><div class="res-card-icon" style="background:rgba(26,188,156,0.15);color:#1abc9c"><i class="fas fa-syringe"></i></div><div class="res-card-body"><h4>Diabetes Management</h4><p>WHO guidelines on diabetes prevention and care.</p></div><i class="fas fa-external-link-alt res-card-link"></i></a>
+                            <a href="https://www.cdc.gov/cancer/index.htm" target="_blank" class="res-card"><div class="res-card-icon" style="background:rgba(231,76,60,0.12);color:#c0392b"><i class="fas fa-ribbon"></i></div><div class="res-card-body"><h4>Cancer Information</h4><p>CDC cancer types, screening, prevention, and research.</p></div><i class="fas fa-external-link-alt res-card-link"></i></a>
+                            <a href="https://www.who.int/health-topics/nutrition" target="_blank" class="res-card"><div class="res-card-icon" style="background:rgba(39,174,96,0.15);color:#27ae60"><i class="fas fa-apple-alt"></i></div><div class="res-card-body"><h4>Nutrition Guide</h4><p>WHO healthy diet and nutritional guidelines.</p></div><i class="fas fa-external-link-alt res-card-link"></i></a>
+                        </div>
+                    </div>
+                    <div class="res-section"><div class="res-section-title"><i class="fas fa-pills"></i> Medication Information</div>
+                        <div class="res-grid">
+                            <a href="https://www.drugs.com" target="_blank" class="res-card"><div class="res-card-icon" style="background:rgba(39,174,96,0.15);color:#27ae60"><i class="fas fa-pills"></i></div><div class="res-card-body"><h4>Drug Database</h4><p>Medications, dosages, interactions, and safety data.</p></div><i class="fas fa-external-link-alt res-card-link"></i></a>
+                            <a href="https://www.mayoclinic.org/drugs-supplements" target="_blank" class="res-card"><div class="res-card-icon" style="background:rgba(230,126,34,0.15);color:#e67e22"><i class="fas fa-exclamation-triangle"></i></div><div class="res-card-body"><h4>Side Effects</h4><p>Managing medication side effects from Mayo Clinic.</p></div><i class="fas fa-external-link-alt res-card-link"></i></a>
+                            <a href="https://ods.od.nih.gov" target="_blank" class="res-card"><div class="res-card-icon" style="background:rgba(26,188,156,0.15);color:#1abc9c"><i class="fas fa-leaf"></i></div><div class="res-card-body"><h4>Herbal & Supplements</h4><p>Evidence-based supplement info from NIH.</p></div><i class="fas fa-external-link-alt res-card-link"></i></a>
+                        </div>
+                    </div>
+                    <div class="res-section"><div class="res-section-title"><i class="fas fa-graduation-cap"></i> Educational References</div>
+                        <div class="res-grid">
+                            <a href="https://www.ncbi.nlm.nih.gov/pmc/" target="_blank" class="res-card"><div class="res-card-icon" style="background:rgba(41,128,185,0.15);color:#2980b9"><i class="fas fa-book-medical"></i></div><div class="res-card-body"><h4>Medical Journals</h4><p>PubMed Central — free full-text research articles.</p></div><i class="fas fa-external-link-alt res-card-link"></i></a>
+                            <a href="https://medlineplus.gov/" target="_blank" class="res-card"><div class="res-card-icon" style="background:rgba(142,68,173,0.15);color:#8e44ad"><i class="fas fa-graduation-cap"></i></div><div class="res-card-body"><h4>Health Education</h4><p>MedlinePlus — NIH consumer health information.</p></div><i class="fas fa-external-link-alt res-card-link"></i></a>
+                            <a href="https://www.redcross.org/take-a-class/first-aid" target="_blank" class="res-card"><div class="res-card-icon" style="background:rgba(231,76,60,0.15);color:#e74c3c"><i class="fas fa-first-aid"></i></div><div class="res-card-body"><h4>First Aid Guide</h4><p>CPR and emergency first aid from Red Cross.</p></div><i class="fas fa-external-link-alt res-card-link"></i></a>
+                            <a href="https://www.who.int/health-topics" target="_blank" class="res-card"><div class="res-card-icon" style="background:rgba(0,229,255,0.1);color:#00e5ff"><i class="fas fa-globe"></i></div><div class="res-card-body"><h4>WHO Health Topics</h4><p>World Health Organization's global health topics database.</p></div><i class="fas fa-external-link-alt res-card-link"></i></a>
+                            <a href="https://www.sleepfoundation.org/" target="_blank" class="res-card"><div class="res-card-icon" style="background:rgba(155,89,182,0.12);color:#9b59b6"><i class="fas fa-moon"></i></div><div class="res-card-body"><h4>Sleep Foundation</h4><p>Sleep science, disorders, hygiene tips, and research.</p></div><i class="fas fa-external-link-alt res-card-link"></i></a>
+                            <a href="https://www.cdc.gov/niosh/topics/ergonomics/" target="_blank" class="res-card"><div class="res-card-icon" style="background:rgba(230,126,34,0.12);color:#e67e22"><i class="fas fa-chair"></i></div><div class="res-card-body"><h4>Ergonomics & Posture</h4><p>Workplace ergonomics and musculoskeletal health from CDC.</p></div><i class="fas fa-external-link-alt res-card-link"></i></a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- REMINDERS TAB -->
+            <div class="content-tab" id="reminders-tab">
+                <div class="tab-header">
+                    <div class="tab-header-left">
+                        <div class="tab-icon-wrap" style="background:linear-gradient(135deg,#7b2ff7,#3a0ca3)"><i class="fas fa-bell"></i></div>
+                        <div><h2>Health Reminders</h2><p>Schedule medicine, water &amp; exercise reminders by email</p></div>
+                    </div>
+                </div>
+                <div class="tab-scroll-body">
+                    <div id="reminders-no-email" class="reminder-no-email hidden">
+                        <i class="fas fa-envelope-open-text"></i><h3>Email Required</h3>
+                        <p>Please save your profile with an email address to enable email reminders.</p>
+                        <button class="btn-primary" id="reminder-go-profile"><i class="fas fa-user"></i> Set Up Profile</button>
+                    </div>
+                    <div id="reminders-main">
+                        <div class="reminder-email-info" id="reminder-email-display"><i class="fas fa-envelope"></i><span>Reminders sent to: <strong id="reminder-to-email">—</strong></span></div>
+                        <!-- Medicine -->
+                        <div class="reminder-card"><div class="rem-card-header"><div class="rem-icon" style="background:rgba(231,76,60,0.15);color:#e74c3c"><i class="fas fa-pills"></i></div><div class="rem-title-block"><h4>💊 Medicine Reminder</h4><p>Never miss your daily medication</p></div><label class="toggle-switch"><input type="checkbox" id="toggle-medicine"><span class="toggle-slider"></span></label></div>
+                            <div class="rem-body hidden" id="rem-medicine-body">
+                                <div class="rem-form-row"><div class="rem-field"><label>Medicine Name(s)</label><input type="text" id="med-name" placeholder="e.g. Metformin, Aspirin"></div><div class="rem-field"><label>Time</label><input type="time" id="med-time" value="08:00"></div><div class="rem-field"><label>Frequency</label><select id="med-freq"><option>Once daily</option><option>Twice daily</option><option>Three times daily</option><option>With meals</option><option>As needed</option></select></div></div>
+                                <div class="rem-field" style="margin-top:10px;"><label>Notes</label><input type="text" id="med-notes" placeholder="e.g. Take with food"></div>
+                                <button class="rem-save-btn" data-type="medicine"><i class="fas fa-paper-plane"></i> Send Reminder Email</button>
+                                <div class="rem-status" id="status-medicine"></div>
+                            </div>
+                        </div>
+                        <!-- Water -->
+                        <div class="reminder-card"><div class="rem-card-header"><div class="rem-icon" style="background:rgba(52,152,219,0.15);color:#3498db"><i class="fas fa-tint"></i></div><div class="rem-title-block"><h4>💧 Water Intake Reminder</h4><p>Stay hydrated throughout the day</p></div><label class="toggle-switch"><input type="checkbox" id="toggle-water"><span class="toggle-slider"></span></label></div>
+                            <div class="rem-body hidden" id="rem-water-body">
+                                <div class="rem-form-row"><div class="rem-field"><label>Daily Goal</label><select id="water-goal"><option>1.5 litres</option><option selected>2 litres</option><option>2.5 litres</option><option>3 litres</option></select></div><div class="rem-field"><label>Remind every</label><select id="water-interval"><option>30 minutes</option><option selected>1 hour</option><option>2 hours</option><option>3 hours</option></select></div><div class="rem-field"><label>Start Time</label><input type="time" id="water-start" value="07:00"></div></div>
+                                <button class="rem-save-btn" data-type="water"><i class="fas fa-paper-plane"></i> Send Reminder Email</button>
+                                <div class="rem-status" id="status-water"></div>
+                            </div>
+                        </div>
+                        <!-- Exercise -->
+                        <div class="reminder-card"><div class="rem-card-header"><div class="rem-icon" style="background:rgba(39,174,96,0.15);color:#27ae60"><i class="fas fa-running"></i></div><div class="rem-title-block"><h4>🏃 Exercise Reminder</h4><p>Keep your fitness routine on track</p></div><label class="toggle-switch"><input type="checkbox" id="toggle-exercise"><span class="toggle-slider"></span></label></div>
+                            <div class="rem-body hidden" id="rem-exercise-body">
+                                <div class="rem-form-row"><div class="rem-field"><label>Exercise Type</label><select id="ex-type"><option>Walking (30 min)</option><option>Jogging (20 min)</option><option>Yoga (30 min)</option><option>Cycling (30 min)</option><option>Gym / Strength training</option><option>Stretching (15 min)</option></select></div><div class="rem-field"><label>Time</label><input type="time" id="ex-time" value="06:30"></div><div class="rem-field"><label>Days</label><select id="ex-days"><option>Every day</option><option>Weekdays only</option><option>Weekends only</option><option>3 days a week</option><option>5 days a week</option></select></div></div>
+                                <button class="rem-save-btn" data-type="exercise"><i class="fas fa-paper-plane"></i> Send Reminder Email</button>
+                                <div class="rem-status" id="status-exercise"></div>
+                            </div>
+                        </div>
+                        <!-- Sleep -->
+                        <div class="reminder-card"><div class="rem-card-header"><div class="rem-icon" style="background:rgba(155,89,182,0.15);color:#9b59b6"><i class="fas fa-moon"></i></div><div class="rem-title-block"><h4>😴 Sleep Reminder</h4><p>Maintain a consistent sleep schedule</p></div><label class="toggle-switch"><input type="checkbox" id="toggle-sleep"><span class="toggle-slider"></span></label></div>
+                            <div class="rem-body hidden" id="rem-sleep-body">
+                                <div class="rem-form-row"><div class="rem-field"><label>Bedtime</label><input type="time" id="sleep-time" value="22:00"></div><div class="rem-field"><label>Target Duration</label><select id="sleep-duration"><option>6 hours</option><option selected>7–8 hours</option><option>9 hours</option></select></div><div class="rem-field"><label>Screen-off Alert</label><select id="sleep-screen"><option>30 min before</option><option selected>1 hour before</option><option>No reminder</option></select></div></div>
+                                <button class="rem-save-btn" data-type="sleep"><i class="fas fa-paper-plane"></i> Send Reminder Email</button>
+                                <div class="rem-status" id="status-sleep"></div>
+                            </div>
+                        </div>
+                        <!-- Meals -->
+                        <div class="reminder-card"><div class="rem-card-header"><div class="rem-icon" style="background:rgba(230,126,34,0.15);color:#e67e22"><i class="fas fa-utensils"></i></div><div class="rem-title-block"><h4>🥗 Meals Reminder</h4><p>Eat on time for stable blood sugar</p></div><label class="toggle-switch"><input type="checkbox" id="toggle-meals"><span class="toggle-slider"></span></label></div>
+                            <div class="rem-body hidden" id="rem-meals-body">
+                                <div class="rem-form-row"><div class="rem-field"><label>Breakfast</label><input type="time" id="meal-breakfast" value="07:30"></div><div class="rem-field"><label>Lunch</label><input type="time" id="meal-lunch" value="13:00"></div><div class="rem-field"><label>Dinner</label><input type="time" id="meal-dinner" value="19:00"></div></div>
+                                <button class="rem-save-btn" data-type="meals"><i class="fas fa-paper-plane"></i> Send Reminder Email</button>
+                                <div class="rem-status" id="status-meals"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+</div>
+
+<!-- SLOGAN OVERLAY -->
+<div id="slogan-overlay" class="slogan-overlay hidden">
+    <div class="slogan-box">
+        <button class="slogan-close-btn" id="close-slogans"><i class="fas fa-times"></i></button>
+        <div class="slogan-star-icon"><i class="fas fa-star"></i></div>
+        <h3>Stay Strong. Stay Healthy.</h3>
+        <div class="slogans-list">
+            <div class="slogan-item">🌟 Be Proud, Be Drug Free</div>
+            <div class="slogan-item">💪 High On Life, Not On Substance</div>
+            <div class="slogan-item">💎 Your Health Is Your Wealth</div>
+            <div class="slogan-item">🌊 Choose Life, Refuse Drugs</div>
+            <div class="slogan-item">✨ One Choice Can Change Everything</div>
+        </div>
+        <div class="slogan-resources">
+            <div class="slogan-res-title"><i class="fas fa-hands-helping"></i> Support Resources</div>
+            <div class="slogan-res-grid">
+                <a href="https://www.samhsa.gov/find-help/national-helpline" target="_blank" class="slogan-res-link"><i class="fas fa-phone-alt"></i> SAMHSA: 1-800-662-4357</a>
+                <a href="https://www.crisistextline.org/" target="_blank" class="slogan-res-link"><i class="fas fa-sms"></i> Crisis Text: HOME→741741</a>
+                <a href="https://www.na.org/" target="_blank" class="slogan-res-link"><i class="fas fa-users"></i> Narcotics Anonymous</a>
+                <a href="https://www.alcoholics-anonymous.org/" target="_blank" class="slogan-res-link"><i class="fas fa-hands"></i> Alcoholics Anonymous</a>
+                <a href="https://www.smartrecovery.org/" target="_blank" class="slogan-res-link"><i class="fas fa-brain"></i> SMART Recovery</a>
+                <a href="https://vajradrishti.org/" target="_blank" class="slogan-res-link"><i class="fas fa-globe"></i> India: Vajra Drishti</a>
+            </div>
+        </div>
+        <div class="slogan-helpline"><i class="fas fa-phone-alt"></i> India NDPS Helpline: <strong>1800-11-0031</strong></div>
+    </div>
+</div>
+
+<!-- ROBOT→HUMAN SAVE OVERLAY -->
+<div id="robot-save-overlay" class="robot-overlay hidden">
+    <div class="robot-scene">
+        <div class="explosion-container" id="explosion-container"></div>
+        <div class="rh-wrapper" id="rh-wrapper">
+            <div id="robot-phase" class="rh-phase">
+                <svg class="robot-svg" viewBox="0 0 80 120" xmlns="http://www.w3.org/2000/svg">
+                  <circle cx="24" cy="112" r="8" fill="#062040" stroke="#00e5ff" stroke-width="1.5" class="rw-l"/>
+                  <circle cx="56" cy="112" r="8" fill="#062040" stroke="#00e5ff" stroke-width="1.5" class="rw-r"/>
+                  <circle cx="24" cy="112" r="3" fill="#00e5ff" opacity="0.85"/>
+                  <circle cx="56" cy="112" r="3" fill="#00e5ff" opacity="0.85"/>
+                  <rect x="18" y="62" width="44" height="44" rx="8" fill="#062040" stroke="#00e5ff" stroke-width="1.7"/>
+                  <rect x="24" y="69" width="32" height="20" rx="4" fill="#041525" stroke="#1ab8d4" stroke-width="1"/>
+                  <polyline points="26,79 29,79 31,71 35,87 38,75 41,79 46,79 48,74 50,79 54,79" stroke="#00e5ff" stroke-width="1.5" fill="none" stroke-linecap="round" class="robot-pulse"/>
+                  <circle cx="40" cy="97" r="6" fill="#041525" stroke="#1ab8d4" stroke-width="1"/>
+                  <circle cx="40" cy="97" r="3" fill="#00e5ff" opacity="0.8"/>
+                  <rect x="2" y="64" width="14" height="34" rx="7" fill="#062040" stroke="#00e5ff" stroke-width="1.4" class="robot-arm-l"/>
+                  <rect x="64" y="64" width="14" height="34" rx="7" fill="#062040" stroke="#00e5ff" stroke-width="1.4" class="robot-arm-r"/>
+                  <circle cx="9" cy="99" r="4.5" fill="#041525" stroke="#1ab8d4" stroke-width="1"/>
+                  <circle cx="71" cy="99" r="4.5" fill="#041525" stroke="#1ab8d4" stroke-width="1"/>
+                  <rect x="33" y="53" width="14" height="11" rx="3.5" fill="#062040" stroke="#1ab8d4" stroke-width="1"/>
+                  <rect x="13" y="20" width="54" height="35" rx="12" fill="#062040" stroke="#00e5ff" stroke-width="2"/>
+                  <rect x="19" y="28" width="17" height="12" rx="6" fill="#041525" stroke="#00e5ff" stroke-width="1.2"/>
+                  <rect x="44" y="28" width="17" height="12" rx="6" fill="#041525" stroke="#00e5ff" stroke-width="1.2"/>
+                  <rect x="22" y="32" width="11" height="5" rx="2.5" fill="#00e5ff" opacity="0.95" class="robot-eye-l"/>
+                  <rect x="47" y="32" width="11" height="5" rx="2.5" fill="#00e5ff" opacity="0.95" class="robot-eye-r"/>
+                  <line x1="40" y1="20" x2="40" y2="7" stroke="#1ab8d4" stroke-width="2" stroke-linecap="round"/>
+                  <circle cx="40" cy="5" r="4.5" fill="#00e5ff" class="robot-antenna-dot"/>
+                  <path d="M25 47 Q40 58 55 47" stroke="#1ab8d4" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+                  <circle cx="13" cy="36" r="4" fill="#041525" stroke="#1ab8d4" stroke-width="1.1"/>
+                  <circle cx="67" cy="36" r="4" fill="#041525" stroke="#1ab8d4" stroke-width="1.1"/>
+                </svg>
+            </div>
+            <div id="human-phase" class="rh-phase hidden">
+                <svg class="human-svg" viewBox="0 0 80 142" xmlns="http://www.w3.org/2000/svg">
+                  <rect x="22" y="102" width="14" height="36" rx="7" fill="#1565c0"/>
+                  <rect x="44" y="102" width="14" height="36" rx="7" fill="#1565c0"/>
+                  <ellipse cx="29" cy="138" rx="13" ry="5.5" fill="#0d47a1"/>
+                  <ellipse cx="51" cy="138" rx="13" ry="5.5" fill="#0d47a1"/>
+                  <rect x="13" y="58" width="54" height="48" rx="11" fill="#1976d2"/>
+                  <rect x="31" y="60" width="18" height="3.5" rx="1.8" fill="#42a5f5" opacity="0.65"/>
+                  <rect x="2" y="60" width="13" height="38" rx="6.5" fill="#1565c0" class="human-arm-l"/>
+                  <rect x="65" y="60" width="13" height="38" rx="6.5" fill="#1565c0" class="human-arm-r"/>
+                  <circle cx="8"  cy="100" r="6.5" fill="#ffcc80"/>
+                  <circle cx="72" cy="100" r="6.5" fill="#ffcc80"/>
+                  <rect x="31" y="49" width="18" height="11" rx="4.5" fill="#ffcc80"/>
+                  <circle cx="40" cy="34" r="25" fill="#ffcc80"/>
+                  <path d="M15 28 Q18 6 40 8 Q62 6 65 28 Q58 16 40 18 Q22 16 15 28Z" fill="#4e342e"/>
+                  <ellipse cx="29" cy="34" rx="5.5" ry="6" fill="white"/>
+                  <ellipse cx="51" cy="34" rx="5.5" ry="6" fill="white"/>
+                  <circle cx="30" cy="35.5" r="3.2" fill="#1a237e"/>
+                  <circle cx="52" cy="35.5" r="3.2" fill="#1a237e"/>
+                  <circle cx="31" cy="34" r="1.3" fill="white"/>
+                  <circle cx="53" cy="34" r="1.3" fill="white"/>
+                  <path d="M27 46 Q40 59 53 46" stroke="#e65100" stroke-width="2.8" fill="none" stroke-linecap="round"/>
+                  <ellipse cx="21" cy="44" rx="5.5" ry="4" fill="#ef9a9a" opacity="0.55"/>
+                  <ellipse cx="59" cy="44" rx="5.5" ry="4" fill="#ef9a9a" opacity="0.55"/>
+                  <ellipse cx="40" cy="40" rx="2.8" ry="2" fill="#e0a070" opacity="0.65"/>
+                </svg>
+            </div>
+            <div class="robot-speech hidden" id="robot-speech">
+                <span class="robot-speech-text" id="speech-text">Saved! ✓</span>
+                <svg class="speech-tail" viewBox="0 0 24 16" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M0 0 L24 0 L12 16 Z" fill="#062040"/>
+                    <path d="M1 1 L23 1 L12 14 Z" fill="none" stroke="#00e5ff" stroke-width="1.1"/>
+                </svg>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="script.js"></script>
+</body>
+</html>

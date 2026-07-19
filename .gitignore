@@ -1,0 +1,13 @@
+node_modules/
+backend/node_modules/
+
+.env
+
+*.db
+*.sqlite
+*.sqlite3
+
+.vscode/
+
+Thumbs.db
+.DS_Store
