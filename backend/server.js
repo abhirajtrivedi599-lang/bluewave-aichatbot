@@ -46,12 +46,13 @@ app.post("/users", (req, res) => {
         function (err) {
 
             if (err) {
+                console.error(" SQlite Error:",err)
                 return res.status(500).json({
                     success: false,
                     message: err.message
                 });
             }
-
+console.log("USer inserted successfully ID:",this.lastID);
             res.json({
                 success: true,
                 userId: this.lastID,
